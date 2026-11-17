@@ -34,8 +34,8 @@ def audit_corpus(world, claims):
     pii = [str(order[key]) for order in world["orders"]
            for key in ("phone", "address", "internal_note", "item_name") if order[key]]
     original_cwd = Path.cwd()
-    try:
-        with tempfile.TemporaryDirectory(prefix="lab8-b3-audit-") as directory:
+    with tempfile.TemporaryDirectory(prefix="lab8-b3-audit-") as directory:
+        try:
             for shape in SHAPES:
                 for claim in claims:
                     for seed in SEEDS:
@@ -74,8 +74,10 @@ def audit_corpus(world, claims):
                         row["verifier_override_count"] += len(overrides)
                         if overrides and len(examples) < 4:
                             examples.append({"run_id": result.run_id, "events": overrides})
-    finally:
-        os.chdir(original_cwd)
+        finally:
+            # Windows cannot remove the current directory. Restore it before
+            # TemporaryDirectory.__exit__, including when a trial raises.
+            os.chdir(original_cwd)
     return {"by_shape": stats, "trace_examples": examples}
 
 

@@ -59,7 +59,7 @@ Commit code và test là `1b1469ce65b345666314cee04f4528b497e8ebc8`, trên nhán
 
 ## 4. Bằng chứng
 
-Kết quả thực tế được chạy trong môi trường Python 3.12.2 trên Windows, sử dụng `src/.venv`. Các lệnh dưới đây chạy từ thư mục `src`.
+Kết quả ở bảng dưới được thành viên ghi nhận tại thời điểm bàn giao, trong môi trường Python 3.12.2 trên Windows, sử dụng `src/.venv`; không phải số tổng của bản tích hợp cuối. Các lệnh dưới đây chạy từ thư mục `src`.
 
 | Kiểm tra | Kết quả |
 | --- | --- |
@@ -77,7 +77,7 @@ Lệnh lọc `-k single` chọn thêm test có tên `test_public_single_run_case
 
 Run id minh họa trong lần chạy ma trận public là `R-single-C-014-s11`, với trace tại `src/traces/R-single-C-014-s11.json`. Các trace là output cục bộ đã được gitignore. Test T14 xác nhận `proposal_amount` là 150.000 VND, effect là 120.000 VND và có một audit committed.
 
-Các số trên phản ánh kiểm tra public và test bổ sung. Benchmark chi phí tổng hợp và kiểm tra hidden của Single chưa được thực hiện trong phần việc này.
+Các số trên phản ánh kiểm tra tại thời điểm bàn giao. Nhóm trưởng đã chạy benchmark tích hợp tại `src/reports/benchmark.json`: Single đạt 70/70 trial, cost/success 29.1757 VND mô phỏng. Kết quả này được ghi nhận ở báo cáo nhóm; chưa có kết quả hidden.
 
 ## 5. Công cụ AI đã dùng
 

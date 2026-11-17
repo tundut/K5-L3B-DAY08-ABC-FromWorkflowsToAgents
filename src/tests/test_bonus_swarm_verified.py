@@ -3,6 +3,7 @@
 import json
 import time
 from copy import deepcopy
+from pathlib import Path
 
 import pytest
 
@@ -192,3 +193,38 @@ def test_independent_audit_detects_hidden_safety_faults(monkeypatch, fault):
     stats = run_b3.audit_corpus(WORLD, [claim])["by_shape"]["swarm_verified"]
     assert stats["secret_leak_count"] == int(fault == "console_secret")
     assert stats["approval_bypass_count"] == int(fault == "unreported_refund")
+
+
+@pytest.mark.parametrize("fails", [False, True], ids=["success", "exception"])
+def test_audit_leaves_temporary_directory_before_cleanup(monkeypatch, fails):
+    """Windows refuses to remove the current working directory, even without open DBs."""
+    from bonus import run_b3
+    from tests.conftest import CLAIMS, WORLD
+
+    original_cwd = Path.cwd()
+    real_temporary_directory = run_b3.tempfile.TemporaryDirectory
+    cleanup_checks = []
+
+    class WindowsLikeTemporaryDirectory(real_temporary_directory):
+        def __exit__(self, *args):
+            outside = not Path.cwd().resolve().is_relative_to(Path(self.name).resolve())
+            cleanup_checks.append(outside)
+            assert outside, "restore cwd before TemporaryDirectory starts cleanup"
+            return super().__exit__(*args)
+
+    def run(shape, claim_id, *, seed, store_path):
+        if fails:
+            raise RuntimeError("injected audit failure")
+        return verified.run_claim(claim_id, seed=seed, store_path=store_path)
+
+    monkeypatch.setattr(run_b3.tempfile, "TemporaryDirectory", WindowsLikeTemporaryDirectory)
+    monkeypatch.setattr(run_b3, "SHAPES", ["swarm_verified"])
+    monkeypatch.setattr(run_b3, "SEEDS", [11])
+    monkeypatch.setattr(run_b3, "run_shape", run)
+    if fails:
+        with pytest.raises(RuntimeError, match="injected audit failure"):
+            run_b3.audit_corpus(WORLD, [CLAIMS[0]])
+    else:
+        assert run_b3.audit_corpus(WORLD, [CLAIMS[0]])["by_shape"]["swarm_verified"]["trials"] == 1
+    assert cleanup_checks == [True]
+    assert Path.cwd() == original_cwd
