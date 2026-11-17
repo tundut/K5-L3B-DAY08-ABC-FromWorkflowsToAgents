@@ -40,6 +40,26 @@ Cách kiểm chứng: chạy riêng `test_shape_safety.py` để xác nhận 260
 
 ## 6. Tự đánh giá
 
-Safety suite bao phủ được các rủi ro chính trong phạm vi lab: approval sai hoặc thiếu, ghi trùng khi retry, ba cửa sổ crash, trần theo đơn và rò thông tin trên các nhánh trả về. Mỗi test dùng DB/thư mục tạm, giúp giữ dữ liệu nguồn nguyên vẹn và quét được artifact do shape tạo.
+Tôi viết bộ kiểm thử an toàn khi ba shape của nhóm chưa được merge.
+Vì vậy kỳ vọng của tôi lấy từ luật nghiệp vụ và mã host, không lấy từ kết quả của shape nào.
+Tôi chạy bộ test với swarm trước, và chỉ áp lên workflow, single, orchestrator sau khi swarm qua 65/65.
+Như vậy nếu một ca đỏ trên shape của bạn thì lỗi nằm ở shape, không phải ở kỳ vọng của test.
 
-Giới hạn: bộ test có chủ đích trên dữ liệu giả không chứng minh hệ thống không còn lỗi. Swarm chỉ là đối chứng, không phải oracle đúng cho mọi seed; vẫn cần nhãn viết theo luật và grader hidden. Kết quả 260/260 xác nhận các kịch bản đã viết, không thay thế kiểm tải, cạnh tranh ghi thực tế hoặc môi trường production. Không tự khai điểm số hay công sức cá nhân ngoài bằng chứng commit.
+Để chắc test thật sự bắt được lỗi, tôi chèn bốn lỗi giả vào bản sao của swarm: nuốt `InjectedCrash`, ghi nguyên order row vào trace, trừ phần đã hoàn trước khi gọi host và in secret ra stdout.
+Cả bốn lỗi đều làm test đỏ.
+Sau đó tôi chạy bộ test trên nhánh `Orchestrator`, nhánh `hiep-sigle-agent` và cuối cùng trên `main` đã tích hợp, kết quả 65/65 cho mỗi shape, tổng 260/260.
+
+Khó khăn thật tôi gặp:
+
+- Bộ chấm chấm từng claim trên một DB mới và coi mọi dòng ledger không thuộc claim đó là `unexpected_ledger_rows`.
+  Ca "đơn hỏng đã hoàn đủ" của tôi lúc đầu đỏ vì tôi chạy hai claim liên tiếp trong cùng DB.
+  Tôi sửa bằng cách gieo khoản hoàn trước thành lịch sử, giống các dòng `C-HIST-*` của giảng viên.
+- `crash.json` do công cụ sinh chỉ kiểm host và swarm.
+  Vì vậy crash của từng shape phải được kiểm riêng trong test của tôi, ở cả ba điểm crash.
+- Trên shape còn là stub, các ca quét rò thông tin vẫn đạt vì stub không ghi gì.
+  Tôi chỉ coi các ca đó là có ý nghĩa khi shape đã được triển khai.
+
+Giới hạn: bộ test chạy trên dữ liệu giả của lab và chỉ xác nhận các kịch bản tôi đã viết.
+Nó không chứng minh hệ thống hết lỗi, không kiểm tải và không kiểm ghi đồng thời thật.
+Swarm chỉ là đối chứng và không đúng ở mọi seed, nên nhãn của test vẫn phải bám theo luật nghiệp vụ.
+Điểm hidden do giảng viên chấm, tôi không tự khai điểm.
