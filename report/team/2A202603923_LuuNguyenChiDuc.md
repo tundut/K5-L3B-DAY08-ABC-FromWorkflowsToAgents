@@ -1,4 +1,4 @@
-# Báo cáo cá nhân — Lưu Nguyễn Chí Đức
+# Báo cáo cá nhân - Lưu Nguyễn Chí Đức
 
 Báo cáo tổng hợp từ commit bàn giao và kết quả kiểm thử thực tế; đánh giá kỹ thuật dựa trên bằng chứng tái lập.
 
@@ -6,7 +6,7 @@ Báo cáo tổng hợp từ commit bàn giao và kết quả kiểm thử thực
 
 - Họ tên: Lưu Nguyễn Chí Đức
 - MSSV: 2A202603923
-- Email: Chưa bổ sung
+- Email: <26ai.duclnc@vinuni.edu.vn>
 - GitHub: TheDLCrimson (tên tác giả commit; thành viên xác nhận tài khoản)
 
 ## 2. Phần việc phụ trách
@@ -26,7 +26,15 @@ Commit `2b13625` thêm `src/tests/test_shape_safety.py` và `src/reports/crash.j
 
 ## 5. Công cụ AI đã dùng
 
-Codex được nhóm trưởng sử dụng để review safety matrix, chạy kiểm chứng trên bản tích hợp và hỗ trợ tổng hợp báo cáo này. Bằng chứng hiện có xác nhận hỗ trợ ở bước review/biên tập; lịch sử công cụ AI khi tác giả viết safety suite chưa được ghi trong bản bàn giao.
+Tôi dùng Claude Code (trợ lý AI trong VS Code) cho phần kiểm thử và an toàn.
+Nhóm trưởng dùng thêm Codex để review safety matrix, chạy kiểm chứng trên bản tích hợp và tổng hợp báo cáo này.
+
+| Loại sử dụng | Công cụ | Việc đã làm | Tôi tự kiểm tra bằng |
+| --- | --- | --- | --- |
+| Đọc hiểu và nghiên cứu | Claude Code | Đọc contract, luật nghiệp vụ, `durability.py`, `policy.py`, `metrics.py` và các test host để biết host chặn gì và ghi audit nào | Đối chiếu từng kỳ vọng với mã host và dữ liệu public, rồi chạy thử |
+| Soạn thảo | Claude Code | Soạn `src/tests/test_shape_safety.py` (approval, idempotency, crash/resume, trần theo đơn, secret/PII, trace ở nhánh trả về sớm) | Chạy với swarm làm đối chứng (65/65) trước khi áp lên ba shape |
+| Phản biện và kiểm chứng | Claude Code | Chèn bốn lỗi giả vào bản sao của swarm (nuốt `InjectedCrash`, ghi order row vào trace, trừ phần đã hoàn trước khi gọi host, in secret ra stdout) để xem test có đỏ không | Cả bốn lỗi đều làm test đỏ; chạy lại trên nhánh `Orchestrator` và `hiep-sigle-agent` rồi trên `main` sau khi tích hợp |
+| Sinh bằng chứng | Công cụ của lab | `src/reports/crash.json` do `python -m lab8.crash_test --count 20` sinh ra, không sửa tay | `crash_safety` = 20/20; đối chiếu nội dung với bản của thành viên Single |
 
 Cách kiểm chứng: chạy riêng `test_shape_safety.py` để xác nhận 260 test pass; sinh lại crash report bằng `python -m lab8.crash_test --count 20 --out reports/crash.json` và đối chiếu với file đã bàn giao. Các assertion kiểm ledger, audit, trace và stdout/stderr thực tế; không lấy lời giải thích AI làm bằng chứng kết quả.
 
