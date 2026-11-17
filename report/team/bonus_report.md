@@ -5,6 +5,7 @@
 - BOUNDARY: Blog 28/01/2026 tóm tắt 180 cấu hình, 3 họ LLM, 4 benchmark. Không lấy số liệu nghiên cứu đó làm kết quả LogiX.
 - HYPOTHESIS: Verifier đối chiếu order sẽ sửa lỗi tin số ngày trong ticket, đưa pass rate/pass^5 về bằng workflow trên hai corpus, với chi phí lớn hơn workflow.
 - Biến cố định: cùng claim × seed 11/22/33/44/55, world, MockLLM, peer/parse/draft calls, tool, pricing và evaluator. Swarm gốc giữ nguyên; biến thể thêm một đọc order có scope và tối đa một lần quote sửa. Không thay host.
+- Commit code và bằng chứng (snapshot chốt): `3c70e65cfa6802e565236ea27d9907dbe335725a`; commit triển khai bonus ban đầu: `ad83ac4`.
 - Code: `src/bonus/swarm_verified.py`; dữ liệu riêng `bonus/cases.jsonl`, `bonus/world.json`. Tám nhãn viết trực tiếp theo luật, không gọi quote để sinh nhãn.
 - Lệnh tái lập từ `src/`, Python 3.11–3.13, đã cài requirements:
 
@@ -48,7 +49,7 @@ Trích event thực từ report (không commit thư mục trace):
 }
 ```
 
-Có 105 test bonus pass: toàn bộ public × 5 seed, 8 case đối kháng × 2 seed, từng field dữ kiện, một vòng sửa, scope, approval, ba cửa sổ crash/top-up, budget, lỗi worker và kiểm chứng bộ audit bắt được leak/ghi tiền không tự khai. Bộ đối kháng có nói quá/nói thiếu ngày, bịa hỏng hàng, nhiều số, injection trên đơn hủy, phí 0 và trần paid.
+Có 107 test bonus pass: toàn bộ public × 5 seed, 8 case đối kháng × 2 seed, từng field dữ kiện, một vòng sửa, scope, approval, ba cửa sổ crash/top-up, budget, lỗi worker và kiểm chứng bộ audit bắt được leak/ghi tiền không tự khai. Hai test bổ sung kiểm khôi phục working directory trước cleanup ở cả nhánh thành công và exception để tránh WinError 32 trên Windows. Bộ đối kháng có nói quá/nói thiếu ngày, bịa hỏng hàng, nhiều số, injection trên đơn hủy, phí 0 và trần paid.
 
 ## Kết luận
 
@@ -56,4 +57,4 @@ Kết quả ủng hộ giả thuyết trong hai corpus: verified đạt độ đ
 
 ## Giới hạn
 
-MockLLM, giá mô phỏng; latency `unavailable`. Không đo latency/speedup. Bộ 8 case được thiết kế bắt điểm yếu đã biết, không đại diện production. Verifier tin DB và quote chuẩn; không bắt lỗi trong chính nguồn chuẩn hoặc mọi lỗi quote khi các field không lệch. Draft được giữ nguyên trước sửa để so công bằng; grader không chấm câu trả lời khách, production cần draft lại sau xác minh. Chưa có hidden: bonus chỉ được tính khi shape chọn qua must-pass, hidden ≥ 0.80 và host test xanh. Không tự khai đã được +10.
+MockLLM, giá mô phỏng; latency `unavailable`. Không đo latency/speedup. Bộ 8 case được thiết kế bắt điểm yếu đã biết, không đại diện production. Verifier tin DB và quote chuẩn; không bắt lỗi trong chính nguồn chuẩn hoặc mọi lỗi quote khi các field không lệch. Draft được giữ nguyên trước sửa để so công bằng; grader không chấm câu trả lời khách, production cần draft lại sau xác minh. Đã tự kiểm thêm 200 trial verified swarm trên 40 claim BTC phát: trace hợp lệ, không có leak_suspect (`src/reports/bonus_b3_hidden_selfcheck.json`). Bộ này không có nhãn, chưa tính được pass rate; bonus chỉ được tính khi shape chọn qua must-pass, hidden ≥ 0.80 và host test xanh. Không tự khai đã được +10.

@@ -8,21 +8,21 @@
 - URL repo, nhánh nộp, commit chốt:
   - https://github.com/tundut/K5-L3B-DAY08-ABC-FromWorkflowsToAgents
   - nhánh: `main`
-  - commit chốt: _(điền khi nộp)_
+  - commit code và bằng chứng: `3c70e65cfa6802e565236ea27d9907dbe335725a` (gồm bài chính và bonus; báo cáo cập nhật ở commit sau)
 
 ## Thành viên
 
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
-|   1 | Huỳnh Văn Cường | 2A202603866 |  | cuong-huynh | Workflow |
-|   2 | Đào Văn Hiệp | 2A202603813 | 26ai.hiepdv3@vinuni.edu.vn | [daohiep2903](https://github.com/daohiep2903) | Single agent |
-|   3 | Nguyễn Như Duy An | 2A202603783 |       |        | Orchestrator và handoff |
-|   4 |        |      |       |        | Kiểm thử và an toàn |
-|   5 |        |      |       |        | Nhóm trưởng, tích hợp và đánh giá |
+|   1 | Huỳnh Văn Cường | 2A202603866 | 26ai.cuonghv@vinuni.edu.vn | cuong-huynh | Workflow |
+|   2 | Đào Văn Hiệp | 2A202603813 | 26ai.hiepdv3@vinuni.edu.vn | daohiep2903 | Single agent |
+|   3 | Nguyễn Như Duy An | 2A202603783 | 26ai.anndh@vinuni.edu.vn | K0heii | Orchestrator và handoff |
+|   4 | Lưu Nguyễn Chí Đức | 2A202603923 | 26ai.duclnc@vinuni.edu.vn | TheDLCrimson | Kiểm thử và an toàn |
+|   5 | Nguyễn Phan Tuấn Đức | 2A202603818 | 26ai.ducnpt@vinuni.edu.vn | tundut | Nhóm trưởng, tích hợp và đánh giá |
 
 ## Phân công cho 5 thành viên
 
-Số thành viên bên dưới tương ứng với STT trong bảng trên. Họ tên và thông tin cá nhân để trống để nhóm bổ sung.
+Số thành viên bên dưới tương ứng với STT trong bảng trên.
 
 | Thành viên | Công việc phụ trách | Sản phẩm bàn giao | Test cần tự viết |
 | --- | --- | --- | --- |
@@ -70,11 +70,11 @@ Các mốc trên là lịch lab mẫu, không phải deadline nộp bài. Deadli
 
 | Người | Vai | Commit | Test đã thêm hoặc sửa |
 | --- | --- | --- | --- |
-| Huỳnh Văn Cường | Workflow | ce1d813 | `test_workflow_owner.py` (C-002 ticket sai ngày; C-004 thiếu order_id; C-005 ngoài principal) |
-| Đào Văn Hiệp — 2A202603813 | Single agent, ReAct tối đa 8 bước, tool đọc, budget, trace và tích hợp host hoàn tiền | [1b1469c](https://github.com/tundut/K5-L3B-DAY08-ABC-FromWorkflowsToAgents/commit/1b1469ce65b345666314cee04f4528b497e8ebc8) | `src/tests/test_single.py` — 13 test pass, gồm giới hạn bước, chặn tool ghi, ticket “ignore policy”, quote đầy đủ, crash/resume và conflict. Ma trận student riêng Single đạt 62/62. |
-| Nguyễn Như Duy An | Orchestrator và handoff | `src/lab8/shapes/orchestrator.py` | `src/tests/test_shape_orchestrator.py` |
-| | Kiểm thử và an toàn | | |
-| | Tích hợp và đánh giá | | |
+| Huỳnh Văn Cường | Workflow | `ce1d813` | `test_workflow_owner.py` (C-002 ticket sai ngày; C-004 thiếu order_id; C-005 ngoài principal) |
+| Đào Văn Hiệp — 2A202603813 | Single agent | `1b1469c` | `src/tests/test_single.py` — 13 test pass, gồm giới hạn bước, chặn tool ghi, ticket “ignore policy”, quote đầy đủ, crash/resume và conflict. Ma trận student riêng Single đạt 62/62. |
+| Nguyễn Như Duy An | Orchestrator và handoff | `5e4eb3c` | `src/tests/test_shape_orchestrator.py` |
+| Lưu Nguyễn Chí Đức | Kiểm thử và an toàn | `2b13625` | `src/tests/test_shape_safety.py` — 260 test approval, retry, crash/resume, cap và leak |
+| Nguyễn Phan Tuấn Đức | Tích hợp và đánh giá | `d0e733f`, `ad83ac4` | `src/tests/test_team_integration.py`; `src/tests/test_research_ablation.py` — trace freshness, kiểm biến can thiệp, approval và crash/resume; B3 `src/tests/test_bonus_swarm_verified.py` — 107 test hiện tại, code B3 ban đầu `ad83ac4`, sửa cleanup Windows `4cf40a2` |
 
 ## Cá nhân
 
@@ -85,6 +85,28 @@ report/team/MSSV_HoTen.md
 ```
 
 Ví dụ: `report/team/20241234_NguyenVanAn.md`.
+
+## 2A202603866_HuynhVanCuong
+
+### Phần việc phụ trách
+
+- Shape A `workflow` (`src/lab8/shapes/workflow.py`): pipeline cố định đọc claim → order → quote → `issue_refund`.
+
+### Đóng góp cụ thể
+
+- Implement `run_claim` (CP2+CP3): tool trực tiếp, full quote, truyền `crash_at`, ghi trace và ném lại `InjectedCrash`.
+- Thêm `src/tests/test_workflow_owner.py`.
+- Xử lý nhánh thiếu mã đơn, ngoài phạm vi principal và quote bằng 0; lấy số tiền từ order có cấu trúc thay vì nội dung ticket.
+- Dùng `finish()` ở mọi nhánh trả về để đồng bộ kết quả với ledger, audit và trace; đóng connection trong `finally`.
+
+### Bằng chứng
+
+- Student matrix: `python -m pytest -q tests/test_public_matrix.py -m student -o addopts= -k workflow` → 62 passed.
+- Owner tests: `python -m pytest -q tests/test_workflow_owner.py -m student -o addopts=` → 3 passed.
+- Commit triển khai và test: `ce1d813`; được tích hợp qua merge `0c26466`.
+- Benchmark tích hợp: 70/70 trial public pass, pass^5 = 1.0, cost/success 27.8571 VND mô phỏng trong `src/reports/benchmark.json`.
+- Run id minh họa: `R-workflow-C-014-s11`, quote 150.000 VND, effect 120.000 VND.
+- Báo cáo cá nhân: [2A202603866_HuynhVanCuong.md](report/team/2A202603866_HuynhVanCuong.md).
 
 ## 2A202603813_DaoVanHiep
 
@@ -107,13 +129,13 @@ Ví dụ: `report/team/20241234_NguyenVanAn.md`.
 
 - Báo cáo cá nhân tại [2A202603813_DaoVanHiep.md](report/team/2A202603813_DaoVanHiep.md).
 - Nhánh bàn giao là `hiep-sigle-agent`, commit code và test `1b1469ce65b345666314cee04f4528b497e8ebc8`.
-- Kết quả đã chạy gồm 13 test bổ sung pass, 62 test student riêng Single pass và bộ host đạt 67 passed.
+- Kết quả tại thời điểm bàn giao Single gồm 13 test bổ sung pass, 62 test student riêng Single pass và bộ host đạt 67 passed. Kết quả tích hợp cuối (721 test) xem `report/team/group_report.md`.
 - Run id minh họa `R-single-C-014-s11`, quote 150.000 VND, refund thực tế 120.000 VND và một audit committed.
 - Logic chọn tool hiện do callback Python quyết định theo observation. Output MockLLM chưa được dùng để phân tích action.
 
 ### Kết quả crash suite đã chạy
 
-Kết quả crash suite được chuyển từ `src/reports/crash.json` sang bảng dưới đây, đạt tổng cộng **20/20**. Suite có sẵn kiểm host và swarm tham chiếu. Test riêng của Single kiểm cả ba điểm crash và retry trong `src/tests/test_single.py`, cùng T12 trong ma trận student.
+Kết quả crash suite được tóm tắt từ `src/reports/crash.json` trong bảng dưới đây, đạt tổng cộng **20/20**. Suite có sẵn kiểm host và swarm tham chiếu. Test riêng của Single kiểm cả ba điểm crash và retry trong `src/tests/test_single.py`, cùng T12 trong ma trận student.
 
 | Kịch bản | Mã kiểm tra | Kết quả |
 | --- | --- | --- |
@@ -125,26 +147,93 @@ Kết quả crash suite được chuyển từ `src/reports/crash.json` sang b�
 | Swarm crash sau effect, trước checkpoint | CR-20 | 1/1 |
 | Tổng | CR-01 đến CR-20 | 20/20 |
 
-Khi tổng hợp bài nộp, thành viên phụ trách kiểm thử sinh lại file JSON bằng lệnh dưới đây trong thư mục `src` để đáp ứng bộ kiểm tra bài nộp.
+File JSON đã được sinh lại và đối chiếu khi tích hợp. Lệnh tái lập trong thư mục `src`:
 
 ```powershell
 python -m lab8.crash_test --count 20 --out reports/crash.json
 ```
 
-## 2A202603866_HuynhVanCuong
+## 2A202603783_NguyenNhuDuyAn
 
 ### Phần việc phụ trách
 
-- Shape A `workflow` (`src/lab8/shapes/workflow.py`): pipeline cố định đọc claim → order → quote → `issue_refund`.
+- Triển khai shape C tại `src/lab8/shapes/orchestrator.py`: orchestrator điều phối investigator chỉ đọc.
+- Thiết lập handoff allowlist và trace an toàn qua ranh giới giữa orchestrator và investigator.
+- Viết test riêng trong `src/tests/test_shape_orchestrator.py` và cung cấp nội dung giải pháp cho báo cáo nhóm.
 
 ### Đóng góp cụ thể
 
-- Implement `run_claim` (CP2+CP3): tool trực tiếp, full quote, truyền `crash_at`, không bắt `InjectedCrash`.
-- Thêm `src/tests/test_workflow_owner.py`.
+- Đọc claim bằng `get_claim_view`, xử lý claim không tồn tại và thiếu mã đơn trước khi điều tra.
+- Tạo handoff bằng `make_handoff`, chỉ cấp `lookup_order`, `lookup_policy`, `compute_compensation`; không chuyển parent context hoặc tool ghi.
+- Chạy `run_readonly_investigators`, kiểm quyền nhìn thấy order và lấy quote từ dữ liệu có cấu trúc.
+- Truyền quote đầy đủ cùng `crash_at` vào host; xử lý thành công, denial và conflict theo output contract.
+- Ghi handoff đã sanitize cùng các field chọn lọc vào trace; dùng `finish()` ở các nhánh return, lưu trace rồi ném lại lỗi crash.
+- Thêm test loại secret khỏi handoff, từ chối tool ghi và kiểm trace Orchestrator không chứa secret.
 
 ### Bằng chứng
 
-- Student matrix: `pytest -q -m student -o addopts= -k workflow` → 62 passed.
-- Owner tests: `pytest -q -m student -o addopts= -k workflow_owner`.
-- Báo cáo cá nhân: `report/team/2A202603866_HuynhVanCuong.md`.
+- Commit triển khai và test: `5e4eb3c`; được tích hợp qua merge `4bb6466`.
+- `python -m pytest -q tests/test_public_matrix.py -m student -o addopts= -k orchestrator` → 62 passed.
+- `python -m pytest -q tests/test_shape_orchestrator.py` → 3 passed.
+- Benchmark tích hợp: 70/70 trial public pass, pass^5 = 1.0, cost/success 46.4286 VND mô phỏng trong `src/reports/benchmark.json`.
+- Run id minh họa: `R-orchestrator-C-014-s11`; quote đầy đủ và hoàn phần chênh được kiểm trong ma trận public.
+- Báo cáo cá nhân: [2A202603783_NguyenNhuDuyAn.md](report/team/2A202603783_NguyenNhuDuyAn.md).
+
+## 2A202603923_LuuNguyenChiDuc
+
+### Phần việc phụ trách
+
+- Kiểm thử an toàn cho workflow, single và orchestrator; dùng swarm tham chiếu làm đối chứng trên các kịch bản phù hợp.
+- Viết safety matrix trong `src/tests/test_shape_safety.py` và tạo bằng chứng crash tại `src/reports/crash.json`.
+- Kiểm approval, idempotency, crash/resume, trần hoàn tiền theo đơn và rò secret/PII.
+
+### Đóng góp cụ thể
+
+- Thêm các kịch bản approval thiếu, mất bản ghi, thu hồi, hết hạn, amount không dương, approval của claim khác và approval chỉ được khẳng định trong ticket.
+- Kiểm retry không tạo refund trùng; quote thay đổi sau khi commit phải giữ dòng cũ và có audit conflict.
+- Kiểm cả ba cửa sổ crash, resume nhiều lần, crash khi top-up và claim khác đến lúc claim đầu chưa hoàn tất checkpoint.
+- Kiểm trần theo đơn với nhiều thứ tự claim, T13 đã hoàn đủ và T14 chỉ trả phần chênh.
+- Cô lập DB và thư mục làm việc trong test; quét result, artifact ngoài SQLite, stdout/stderr để phát hiện secret/PII và field của raw row.
+- Kiểm trace ở các nhánh return sớm; dùng ledger, audit và `trial_pass` để đối chiếu thay vì chỉ dựa vào status tự khai.
+
+### Bằng chứng
+
+- Commit test và crash report: `2b13625`; được tích hợp qua merge `66f5e9b`.
+- `python -m pytest -q tests/test_shape_safety.py -m student -o addopts=` → 260 passed trên bản tích hợp.
+- `python -m lab8.crash_test --count 20 --out reports/crash.json` → crash safety 20/20; file bàn giao khớp kết quả chạy lại.
+- Crash suite có sẵn kiểm host/swarm; safety matrix bổ sung kiểm crash riêng cho cả ba shape nhóm viết.
+- Run id minh họa trong các test: `R-workflow-C-012-s11`, `R-single-C-012-s11`, `R-orchestrator-C-012-s11`.
+- Báo cáo cá nhân: [2A202603923_LuuNguyenChiDuc.md](report/team/2A202603923_LuuNguyenChiDuc.md).
+
+## 2A202603818_NguyenPhanTuanDuc
+
+### Phần việc phụ trách
+
+- Nhóm trưởng: phân công, review và tích hợp ba shape cùng safety matrix; tổng hợp bằng chứng nộp bài.
+- Chạy benchmark, thực hiện nghiên cứu R1 và hoàn thiện ADR, research card, báo cáo nhóm, bảng đóng góp.
+- Triển khai bonus B3: swarm có verifier, bộ claim đối kháng và phép audit an toàn độc lập.
+
+### Đóng góp cụ thể
+
+- Review các bản merge, chạy test host/student và kiểm các ranh giới approval, quote đầy đủ, crash/resume, handoff và trace.
+- Thêm `src/tests/test_team_integration.py`: cố ý làm trace cũ rồi retry nhánh return sớm trên cả ba shape; kiểm trace mới và ledger không đổi.
+- Viết `src/bonus/investigator_ablation.py` và `src/tests/test_research_ablation.py`; chỉ thay cách chia cùng công việc đọc thành một hoặc hai investigator, kiểm kết quả nghiệp vụ, chi phí bổ sung, approval và crash.
+- Sinh `benchmark.json` và `research_ablation.json` bằng benchmark chính thức; chọn workflow từ độ đúng, chi phí và mức tự chủ quan sát được.
+- Viết `src/bonus/swarm_verified.py`: đối chiếu dữ kiện quote với order có scope, sửa tối đa một lần và ghi `verifier_override`.
+- Tạo 8 claim đối kháng có nhãn viết trực tiếp theo luật, `src/tests/test_bonus_swarm_verified.py` và runner `src/bonus/run_b3.py` để so sánh cùng corpus/seed và kiểm ledger, secret/PII riêng.
+- Rà số liệu, run id, hash và liên kết trong báo cáo; kiểm thử cuối bằng Python 3.13.16 trên macOS arm64.
+
+### Bằng chứng
+
+- Commit tích hợp, ablation và bằng chứng bài chính: `d0e733f`; commit bonus B3: `ad83ac4`; sửa cleanup Windows và test hồi quy: `4cf40a2`.
+- `python -m pytest -q tests/test_team_integration.py tests/test_research_ablation.py` → 33 passed.
+- `python -m pytest -q tests/test_bonus_swarm_verified.py` → 107 passed.
+- `python -m pytest -q -o addopts=` → 721 passed trên bản tích hợp gồm bonus.
+- `src/reports/benchmark.json`: workflow 70/70, cost/success 27.8571 VND mô phỏng; ADR chọn workflow.
+- `src/reports/research_ablation.json`: cả hai nhánh 70/70, cost/success tăng 20% khi tách hai investigator.
+- `src/reports/bonus_b3_public.json`, `bonus_b3_adversarial.json`: verified swarm đạt 70/70 public và 40/40 đối kháng; `bonus_b3_evidence.json` ghi số lần can thiệp và safety counters.
+- Run id dẫn chứng: `R-workflow-C-014-s11`, `R-investigator_two-C-014-s11`, `R-swarm_verified-C-002-s55`.
+- Bằng chứng tự kiểm bộ BTC phát: `src/reports/hidden_selfcheck.json` (600 trial, ba shape) và `src/reports/bonus_b3_hidden_selfcheck.json` (200 trial). Không có lỗi trace hoặc leak_suspect; không có nhãn để tính pass rate. Commit kết quả: `3c70e65cfa6802e565236ea27d9907dbe335725a`.
+- `python -m lab8.check_submission` → 0 FAIL; chưa dùng kết quả public để khẳng định đạt ngưỡng hidden hoặc được cộng điểm bonus.
+- Báo cáo cá nhân: [2A202603818_NguyenPhanTuanDuc.md](report/team/2A202603818_NguyenPhanTuanDuc.md).
 
