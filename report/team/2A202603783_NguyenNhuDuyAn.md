@@ -4,41 +4,34 @@
 
 - Họ tên: Nguyễn Như Duy An
 - MSSV: 2A202603783
-- Email: Chưa bổ sung
-- GitHub: Chưa xác nhận
+- Email: 26ai.annnd@vinuni.edu.vn
+- GitHub: K0heii (https://github.com/K0heii)
 
 ## 2. Phần việc phụ trách
 
-- Shape C `orchestrator` + investigator chỉ đọc: `src/lab8/shapes/orchestrator.py`
-- Handoff sanitize qua allowlist bằng `lab8.handoff.make_handoff`
-- Test bảo mật handoff/trace: `src/tests/test_shape_orchestrator.py`
+Shape C orchestrator: điều phối investigator chỉ đọc qua handoff sanitize, quote từ dữ liệu có cấu trúc và gọi host ghi refund.
 
 ## 3. Đóng góp cụ thể
 
-- Cài 3 nhánh quyết định theo `docs/contracts.md`: `needs_info` (thiếu `order_id`), `escalated` (order không thấy/ngoài principal), `denied` (quote ≤ 0 hoặc host từ chối).
-- Investigator chỉ nhận `lookup_order`, `lookup_policy`, `compute_compensation`; không có `issue_refund`.
-- Truyền **quote đầy đủ** vào `durability.issue_refund` để host tự trừ phần đã hoàn của claim trước (T13, T14).
-- CP3: truyền `crash_at` xuyên xuống `issue_refund`, ghi trace rồi ném lại `InjectedCrash`, không nuốt lỗi crash.
-- Trace chỉ ghi handoff đã sanitize (`safe_dump`), không ghi claim row/order row thô.
+- `src/lab8/shapes/orchestrator.py`: đọc claim, xây handoff allowlist (`lookup_order`, `lookup_policy`, `compute_compensation`), chạy `run_readonly_investigators`, lấy quote từ kết quả và truyền đầy đủ vào `durability.issue_refund`.
+- Xử lý 5 nhánh return: `needs_info` (thiếu `order_id`), `escalated` (order không thấy/ngoài principal), `denied` (quote ≤ 0 hoặc host từ chối), `failed` (conflict), `resolved` (thành công).
+- CP3: truyền `crash_at` vào `issue_refund`, ghi trace và ném lại `InjectedCrash` mà không bắt.
+- Trace chỉ ghi handoff đã sanitize qua `safe_dump`, không ghi claim/order row thô.
+- `src/tests/test_shape_orchestrator.py`: 3 test kiểm `sanitize` xoá field cấm, `make_handoff` từ chối tool ghi và trace không chứa `CANARY_SECRET_*`.
 
 ## 4. Bằng chứng
 
-- `python -m pytest -q tests/test_public_matrix.py -m student -o addopts= -k orchestrator` → **62 passed**.
-- `python -m pytest -q tests/test_shape_orchestrator.py` → **3 passed** (sanitize field, từ chối write tool, trace không chứa `CANARY_SECRET_*`).
-- Bộ host **57 passed** là kết quả thành viên ghi nhận trước tích hợp; không phải tổng hiện tại. Bản tích hợp cuối có 719 test pass trên Python 3.13.16, xem `group_report.md`.
-- Commit code và test: `5e4eb3c`; merge vào main qua `4bb6466`.
-- Run id dẫn chứng: `R-orchestrator-C-014-s11` trong `src/reports/benchmark.json`; proposal 150.000 VND, host ghi phần chênh 120.000 VND được kiểm qua ma trận public.
-- Benchmark tích hợp: 70/70 trial pass, cost/success 46.4286 VND mô phỏng. Đây là kết quả do nhóm trưởng tổng hợp.
-
+- Commit: `5e4eb3c`; merge vào main: `4bb6466`; commit chốt nhóm: `3c70e65`
+- Ma trận public: `pytest -q -m student -k orchestrator` → 62 passed
+- Test handoff: `pytest -q tests/test_shape_orchestrator.py` → 3 passed
+- Benchmark (`src/reports/benchmark.json`): 70/70 trial, pass_rate 1.0, pass^5 1.0, cost/success 46.43 VND
+- Crash suite (`src/reports/crash.json`): 20/20
+- Run id: `R-orchestrator-C-014-s11` (T14 hoàn phần chênh qua ma trận)
 
 ## 5. Công cụ AI đã dùng
 
-Codex được nhóm trưởng sử dụng để rà soát code Orchestrator, chuẩn hóa báo cáo này và đối chiếu số liệu với test cùng benchmark. Phạm vi hỗ trợ đã xác minh là khâu review và biên tập báo cáo; bản bàn giao chưa cung cấp lịch sử công cụ AI ở giai đoạn triển khai.
-
-Cách kiểm chứng: chạy lại 3 test trong `test_shape_orchestrator.py`, ma trận public cho Orchestrator, safety matrix về approval/crash/leak và đối chiếu `benchmark.json`. Số liệu lấy từ lần chạy thật; không sửa host hoặc JSON report để đạt ngưỡng.
+Claude Code hỗ trợ đọc swarm_reference, gợi ý viết orchestrator.py theo pattern có sẵn, hỗ trợ test handoff và rà soát logic 5 nhánh return. Kiểm chứng: chạy 62 test public, 3 test handoff, đối chiếu benchmark.json và trace không chứa secret qua grep.
 
 ## 6. Tự đánh giá
 
-Phần bàn giao hoàn thành luồng orchestrator–investigator, handoff allowlist, quote đầy đủ, trace và phục hồi qua host. Ma trận public đạt 70/70 trial ở 5 seed, có test handoff từ chối tool ghi và trace không lộ secret.
-
-Giới hạn còn lại: investigator là hàm đọc xác định, chưa có LLM suy luận độc lập. Cost/success 46.43 VND mô phỏng cao hơn workflow 27.86 mà chưa tăng độ đúng public, nên chưa có bằng chứng cần chọn kiến trúc này cho task hiện tại. Kết quả public không chứng minh chất lượng hidden hoặc production. Đánh giá kỹ thuật này dựa trên sản phẩm và test, không tự khai điểm số, thời gian làm hay trải nghiệm cá nhân chưa được ghi nhận.
+Orchestrator đạt 70/70 trial public, crash 20/20, không lộ secret. Cost/success 46.43 VND cao hơn workflow (27.86) mà chưa tăng độ đúng, nên chưa có lý do chọn shape này cho task hiện tại. Investigator là hàm đọc xác định, chưa có model suy luận độc lập. Kết quả public không chứng minh pass rate hidden ≥ 0.75.

@@ -16,7 +16,7 @@
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 | Huỳnh Văn Cường | 2A202603866 | 26ai.cuonghv@vinuni.edu.vn | cuong-huynh | Workflow |
 |   2 | Đào Văn Hiệp | 2A202603813 | 26ai.hiepdv3@vinuni.edu.vn | daohiep2903 | Single agent |
-|   3 | Nguyễn Như Duy An | 2A202603783 | 26ai.anndh@vinuni.edu.vn | K0heii | Orchestrator và handoff |
+|   3 | Nguyễn Như Duy An | 2A202603783 | 26ai.annnd@vinuni.edu.vn | K0heii | Orchestrator và handoff |
 |   4 | Lưu Nguyễn Chí Đức | 2A202603923 | 26ai.duclnc@vinuni.edu.vn | TheDLCrimson | Kiểm thử và an toàn |
 |   5 | Nguyễn Phan Tuấn Đức | 2A202603818 | 26ai.ducnpt@vinuni.edu.vn | tundut | Nhóm trưởng, tích hợp và đánh giá |
 
